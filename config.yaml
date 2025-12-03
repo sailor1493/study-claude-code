@@ -1,0 +1,58 @@
+# Object Detection Framework Configuration
+
+# Model configurations
+models:
+  yolo_small:
+    model_type: yolo
+    device: cuda
+    confidence_threshold: 0.5
+    params:
+      model_name: yolov5s
+
+  yolo_medium:
+    model_type: yolo
+    device: cuda
+    confidence_threshold: 0.5
+    params:
+      model_name: yolov5m
+
+  detr_base:
+    model_type: detr
+    device: cuda
+    confidence_threshold: 0.7
+    params:
+      model_name: detr_resnet50
+
+  vlm_base:
+    model_type: vlm
+    device: cuda
+    confidence_threshold: 0.5
+    params:
+      model_name: owlvit-base
+      text_queries:
+        - person
+        - car
+        - dog
+        - cat
+
+# Benchmark configurations
+benchmarks:
+  performance_test:
+    benchmark_type: performance
+    params:
+      num_images: 100
+      image_size: [640, 480]
+
+  accuracy_test:
+    benchmark_type: accuracy
+    data_path: null  # Set to your test data path
+    params:
+      iou_threshold: 0.5
+
+# API server configuration
+api:
+  host: 0.0.0.0
+  port: 8000
+  default_model: yolov5s
+  enable_gpu: true
+  device: null  # null for auto-detection
