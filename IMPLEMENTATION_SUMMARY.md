@@ -13,14 +13,16 @@ This repository now contains a comprehensive, modular object detection framework
 ### 2. Model Support
 - **YOLO**: Integration with YOLOv5 via torch hub
 - **DETR**: Detection Transformer models from torchvision
-- **VLM**: Placeholder for Vision Language Models (extensible for OWL-ViT, Grounding DINO, etc.)
-- All models support both CPU and GPU execution
+- **VLM via VLLM Server**: Vision-language models (Qwen3VL, GPT-4V, etc.) that receive image+prompt requests and return text responses with bounding boxes
+- All traditional models support both CPU and GPU execution
+- VLM models utilize VLLM servers for multi-GPU data parallelism
 
 ### 3. GPU Support
 - Automatic device detection (CUDA/CPU)
-- Explicit device specification support
+- Explicit device specification support for single GPU
+- Multi-GPU data-parallel inference via VLLM server for VLM models
 - Device information utilities
-- Multi-GPU capable (via device specification like 'cuda:0', 'cuda:1')
+- Async batch processing for efficient multi-GPU utilization
 
 ### 4. Benchmarking Framework
 - **Performance Benchmarks**: Measure inference speed and throughput
@@ -28,15 +30,21 @@ This repository now contains a comprehensive, modular object detection framework
 - Extensible benchmark base class for custom metrics
 - Support for synthetic and real test data
 
-### 5. REST API Server
-- FastAPI-based web server for model inference
-- VLLM-compatible endpoints (`/v1/detect`)
+### 5. VLLM Integration
+- **Async VLLM Client**: Client for making async requests to VLLM servers
+- **VLM Server Detector**: Detector that calls VLLM servers with image+prompt and parses text responses
+- **Multi-GPU Support**: VLLM server handles data-parallel inference across multiple GPUs
+- **Batch Processing**: Efficient async batch processing for high throughput
+- **Text-to-BBox Parsing**: Parses structured text responses to extract bounding box coordinates
+
+### 6. Local API Server (Optional)
+- FastAPI-based web server for local model inference
 - Health check and model information endpoints
 - Thread-safe request handling
 - Support for multiple models
 - Configurable confidence thresholds
 
-### 6. Utilities
+### 7. Utilities
 - **Device Management**: Device detection, info, and selection
 - **Visualization**: Bounding box drawing with labels and scores
 - **Configuration**: YAML-based configuration management

@@ -108,16 +108,28 @@ detector = DETRDetector(
 )
 ```
 
-### Vision Language Models (VLM)
+### Vision Language Models (VLM) via VLLM Server
 ```python
-from object_detection.models.vlm import VLMDetector
+from object_detection.models.vlm_server import VLMServerDetector
 
-detector = VLMDetector(
-    model_name="owlvit-base",
-    text_queries=["person", "car", "dog"],
-    device="cuda"
+# Connect to VLLM server for VLM-based detection
+detector = VLMServerDetector(
+    model_name="Qwen/Qwen2-VL-7B-Instruct",  # or GPT-4V, etc.
+    vllm_server_url="http://localhost:8000",
+    confidence_threshold=0.5
 )
+
+# Supports text-based detection responses
+result = detector.predict(image)
+
+# Batch processing with async for multi-GPU parallelism
+results = detector.batch_predict(images)
 ```
+
+The VLM detector sends image and prompt to a VLLM server and parses text responses containing bounding box coordinates. This enables:
+- **Multi-GPU data parallelism** via VLLM server
+- **Async batch processing** for efficient throughput
+- Support for models like **Qwen3VL, GPT-4V** that return structured text responses
 
 ## Benchmarking
 
@@ -151,34 +163,67 @@ result = benchmark.run()
 
 ## API Usage
 
-### Health Check
+### Local Detection API
+
+The framework includes a FastAPI server for local model inference:
+
 ```bash
+# Start local API server
+python examples/run_server.py --model yolov5s --port 8000
+
+# Health check
 curl http://localhost:8000/health
-```
 
-### List Models
-```bash
+# List models
 curl http://localhost:8000/models
-```
 
-### Detect Objects
-```bash
+# Detect objects
 curl -X POST "http://localhost:8000/detect?confidence_threshold=0.5" \
   -F "file=@image.jpg"
 ```
 
-### VLLM-Compatible Endpoint
+### VLLM Server for VLM Models
+
+For VLM-based detection with multi-GPU support, use VLLM server:
+
 ```bash
-curl -X POST "http://localhost:8000/v1/detect?confidence_threshold=0.5" \
-  -F "file=@image.jpg"
+# Start VLLM server with vision-language model
+python -m vllm.entrypoints.openai.api_server \
+  --model Qwen/Qwen2-VL-7B-Instruct \
+  --port 8000 \
+  --tensor-parallel-size 2  # For multi-GPU
+
+# Use VLM detector to call the server
+python examples/vlm_detection.py
 ```
+
+The VLM detector sends async requests to the VLLM server, enabling:
+- **Multi-GPU data parallelism** for high throughput
+- **Async batch processing** with automatic load balancing
+- Support for vision-language models like Qwen3VL, GPT-4V
 
 ## GPU Support
 
-The framework automatically detects and uses GPU if available. You can also explicitly specify the device:
+### Single GPU
+The framework automatically detects and uses GPU if available:
 
 ```python
 detector = YOLODetector(model_name="yolov5s", device="cuda:0")
+```
+
+### Multi-GPU with VLLM
+
+For multi-GPU data parallelism, use VLM models via VLLM server:
+
+```python
+# VLLM handles multi-GPU distribution automatically
+detector = VLMServerDetector(
+    model_name="Qwen/Qwen2-VL-7B-Instruct",
+    vllm_server_url="http://localhost:8000"
+)
+
+# Batch processing utilizes all GPUs
+results = detector.batch_predict(images)  # Distributed across GPUs
 ```
 
 Check available devices:
