@@ -113,6 +113,11 @@ class VLLMClient:
                 ) as response:
                     if response.status == 200:
                         result = await response.json()
+                        # Validate response structure
+                        if 'choices' not in result or not result['choices']:
+                            raise RuntimeError("Invalid response: missing 'choices' field")
+                        if 'text' not in result['choices'][0]:
+                            raise RuntimeError("Invalid response: missing 'text' field in choices")
                         return result['choices'][0]['text']
                     elif response.status >= 500:
                         # Server error, retry
@@ -161,8 +166,11 @@ class VLLMClient:
         Returns:
             List of generated text responses
         """
-        if images is not None and len(images) != len(prompts):
-            raise ValueError("Number of images must match number of prompts")
+        if images is not None:
+            if len(images) != len(prompts):
+                raise ValueError("Number of images must match number of prompts")
+            if not images or not prompts:
+                raise ValueError("Both images and prompts must be non-empty when images are provided")
         
         tasks = []
         for i, prompt in enumerate(prompts):

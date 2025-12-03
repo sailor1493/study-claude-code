@@ -1,4 +1,10 @@
-"""Example: VLM-based object detection using VLLM server."""
+"""Example: VLM-based object detection using VLLM server.
+
+Note: For proper usage, install the package first:
+  pip install -e .
+
+This example uses sys.path for demonstration purposes only.
+"""
 
 import sys
 from pathlib import Path
@@ -6,7 +12,7 @@ import numpy as np
 from PIL import Image
 import asyncio
 
-# Add src to path
+# Add src to path (for demo purposes only - install package for production)
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from object_detection.models.vlm_server import VLMServerDetector

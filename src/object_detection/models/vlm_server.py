@@ -101,15 +101,23 @@ class VLMServerDetector(BaseDetector):
             try:
                 # Try to parse the detection format
                 # Format: object_name|confidence|x1,y1,x2,y2
+                # Supports negative coords and scientific notation
                 match = re.match(
-                    r'([^|]+)\|([0-9.]+)\|([0-9.]+),([0-9.]+),([0-9.]+),([0-9.]+)',
+                    r'([^|]+)\|([-0-9.e+]+)\|([-0-9.e+,\s]+)',
                     line
                 )
                 
                 if match:
                     obj_name = match.group(1).strip()
                     confidence = float(match.group(2))
-                    x1, y1, x2, y2 = map(float, match.groups()[2:])
+                    coords_str = match.group(3)
+                    
+                    # Parse coordinates
+                    coords = [float(x.strip()) for x in coords_str.split(',')]
+                    if len(coords) != 4:
+                        continue
+                    
+                    x1, y1, x2, y2 = coords
                     
                     # Skip low confidence detections
                     if confidence < self.confidence_threshold:
@@ -164,6 +172,9 @@ class VLMServerDetector(BaseDetector):
             
             except (ValueError, IndexError) as e:
                 # Skip malformed lines
+                # Could add logging here if needed:
+                # import logging
+                # logging.warning(f"Failed to parse line: {line}, error: {e}")
                 continue
         
         # Convert to numpy arrays
