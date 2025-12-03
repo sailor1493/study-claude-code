@@ -168,6 +168,18 @@ def compute_map(
     """
     Compute mean Average Precision (mAP) metrics.
     
+    NOTE: This is a simplified mAP computation for basic evaluation.
+    
+    Limitations:
+    - Does not compute full precision-recall curves
+    - Does not handle per-class AP calculations
+    - Does not support multiple IoU thresholds (COCO-style)
+    
+    For production use, consider using:
+    - pycocotools for COCO dataset evaluation
+    - torchmetrics for general metrics
+    - Official evaluation scripts from model repositories
+    
     Args:
         predictions: List of predicted detection results
         ground_truths: List of ground truth detection results
@@ -176,8 +188,6 @@ def compute_map(
     Returns:
         Dictionary with mAP and other metrics
     """
-    # Simplified mAP computation
-    # In production, would use proper COCO evaluation toolkit
     
     total_tp = 0
     total_fp = 0

@@ -101,7 +101,11 @@ class BaseDetector(ABC):
         pass
     
     @abstractmethod
-    def postprocess(self, outputs: Any, original_shape: tuple) -> DetectionResult:
+    def postprocess(
+        self, 
+        outputs: Union[torch.Tensor, Dict[str, torch.Tensor], List[torch.Tensor]], 
+        original_shape: tuple
+    ) -> DetectionResult:
         """Postprocess model outputs to DetectionResult."""
         pass
     

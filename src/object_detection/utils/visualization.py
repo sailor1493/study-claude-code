@@ -40,7 +40,7 @@ def visualize_detections(
     # Try to load a font
     try:
         font = ImageFont.truetype("DejaVuSans.ttf", 12)
-    except:
+    except (OSError, IOError):
         font = ImageFont.load_default()
     
     # Draw each detection

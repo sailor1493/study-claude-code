@@ -179,15 +179,12 @@ class DetectionAPI:
                     self._load_model(model_name)
                 detector = self.models[model_name]
                 
-                # Update confidence threshold
-                original_threshold = detector.confidence_threshold
-                detector.confidence_threshold = confidence_threshold
-                
-                # Run detection
+                # Run detection - filter results after prediction to avoid thread safety issues
                 result = detector.predict(image)
                 
-                # Restore original threshold
-                detector.confidence_threshold = original_threshold
+                # Apply confidence threshold filtering
+                if confidence_threshold != detector.confidence_threshold:
+                    result = result.filter_by_score(confidence_threshold)
                 
                 return DetectionResponse(
                     boxes=result.boxes.tolist(),

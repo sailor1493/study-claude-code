@@ -46,8 +46,15 @@ def verify_imports():
         
         return True
     
-    except Exception as e:
+    except (ImportError, ModuleNotFoundError) as e:
         print(f"✗ Import failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+    except Exception as e:
+        print(f"✗ Unexpected error during import: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 
